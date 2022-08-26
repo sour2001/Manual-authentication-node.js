@@ -2,10 +2,31 @@ const User=require('../models/user');
 
 
 module.exports.profile=function(req,res){
+    /*
     return res.render('user_profile',{
         title:"user/profile"
+    });*/
+    if(req.cookies.user_id){
+    User.findById(req.cookies.user_id,function(err,user){
+if(user){
+    return res.render('user_profile',{
+        title:"user/profile",
+        user:user
+    })
+}
+else{
+    return res.redirect('/users/sign-in');
+}
+//return res.redirect('/users/sign-in');
     });
 }
+
+    else{
+    return res.redirect('/users/sign-in');
+    }
+
+}
+
 //render in sign Up page
 module.exports.signUp=function(req,res){
     return res.render("user_sign_up",{
@@ -42,5 +63,26 @@ User.findOne({email:req.body.email},function(err,user){
 }
 //sign in and create seassion for users
  module.exports.createSession=function(req,res){
-    //to do late 
- }
+   //steps to authenticate
+    //find the user
+    User.findOne({email:req.body.email},function(err,user){
+        if(err){console.log('error in finding user in signing up');
+        return; }
+         //handle user found
+        if(user){//handle password which don/t match
+                //handle session creation
+           if(user.password!=req.body.password){
+            return res.redirect('back');
+           }
+           res.cookie('user_id',user.id);
+           return res.redirect('/users/profile');
+            }else{    //handle user not found
+                return res.redirect('back');
+        }
+    });
+    }
+   
+    
+
+
+ 
